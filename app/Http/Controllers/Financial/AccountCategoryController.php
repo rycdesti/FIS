@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Financial;
 use App\Models\Financial\AccountCategory;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use Yajra\Datatables\Facades\Datatables;
+use Yajra\Datatables\Html\Builder;
 
 class AccountCategoryController extends Controller
 {
@@ -16,7 +18,32 @@ class AccountCategoryController extends Controller
     public function index()
     {
         $account_categories = AccountCategory::all();
+
+        if(request()->ajax()) {
+            return Datatables::of(AccountCategory::query())
+                ->editColumn('disabled', function(AccountCategory $accountCategory) {
+                    return ($accountCategory->disabled == 'N' ? '<span class="badge-info">Enabled' : '<span class="badge-danger">Disabled') . '</span>';
+                })
+                ->editColumn('actions', function() {
+                    return '<button class="btn btn-secondary">EDIT</button><button class="btn btn-danger">X</button>';
+                })
+                ->make(true);
+        }
+
 //        $account_categories = Blog::orderBy('description', 'asc')->get();
+
+//        echo Datatables::eloquent(AccountCategory::query())
+//            ->editColumn('description', function(AccountCategory $accountCategory) {
+//                return 'Description: ' . $accountCategory->description;
+//            })
+//            ->make(true);
+
+//        return Datatables::eloquent($account_categories)
+//            ->editColumn('description', function(AccountCategory $accountCategory) {
+//                return "Description: ". $accountCategory->description;
+//            })
+//            ->rawColumns(['description'])
+//            ->make(true);
 
         return view('financial.account_category', compact('account_categories'));
     }
